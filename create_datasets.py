@@ -105,8 +105,8 @@ def save_style_lib_hdf5(style_images, filename="style_data.hdf5"):
         f.create_dataset("style", data=style_images)
 
 
-def compile_image(image_slices):
-    new_image = np.zeros((512, 512))
+def compile_image(image_slices, image_size=512):
+    new_image = np.zeros((image_size - 24, image_size - 24))
     h = 0
     for i in range(15):
         w = 0
@@ -114,13 +114,14 @@ def compile_image(image_slices):
             cur_idx = i * 15 + j
             for ii in range(40):
                 for jj in range(40):
-                    if new_image[h + ii, w + jj] == 0:
+                    if h + ii < image_size and w + jj < image_size and new_image[h + ii, w + jj] == 0:
                         new_image[h + ii, w + jj] = image_slices[cur_idx][ii, jj]
-                    else:
+                    elif h + ii < image_size and w + jj < image_size:
                         new_image[h + ii, w + jj] = (new_image[h + ii, w + jj] + image_slices[cur_idx][ii, jj]) / 2
             w += 32
         h += 32
-    
+    return new_image
+
     
 if __name__ == '__main__':
     patch_size = 40
