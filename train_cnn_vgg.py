@@ -5,7 +5,7 @@ from keras.optimizers import Adam
 from keras import losses
 import h5py
 from keras.layers import BatchNormalization as BN
-from sobel import *
+from utils.sobel import *
 from keras import backend as K
 from keras.applications.vgg16 import VGG16
 from keras.models import Model

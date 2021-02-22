@@ -4,6 +4,7 @@ import h5py
 import scipy.ndimage
 import matplotlib.pyplot as plt
 from pydicom import dcmread
+
 import random
 
 directory = '/Users/evgenia/Desktop/диплом/Mayo-Dataset/'
@@ -105,21 +106,22 @@ def save_style_lib_hdf5(style_images, filename="style_data.hdf5"):
         f.create_dataset("style", data=style_images)
 
 
-def compile_image(image_slices, image_size=512):
-    new_image = np.zeros((image_size - 24, image_size - 24))
+def compile_image(image_slices, image_size=512, slice_size=40, stride=32):
+    new_image = np.zeros((image_size, image_size))
+    slices_num = image_size // stride
     h = 0
-    for i in range(15):
+    for i in range(slices_num):
         w = 0
-        for j in range(15):
-            cur_idx = i * 15 + j
-            for ii in range(40):
-                for jj in range(40):
-                    if h + ii < image_size and w + jj < image_size and new_image[h + ii, w + jj] == 0:
+        for j in range(slices_num):
+            cur_idx = i * slices_num + j
+            for ii in range(slice_size):
+                for jj in range(slice_size):
+                    if h + ii < image_size and w + jj < image_size and not new_image[h + ii, w + jj]:
                         new_image[h + ii, w + jj] = image_slices[cur_idx][ii, jj]
                     elif h + ii < image_size and w + jj < image_size:
                         new_image[h + ii, w + jj] = (new_image[h + ii, w + jj] + image_slices[cur_idx][ii, jj]) / 2
-            w += 32
-        h += 32
+            w += stride
+        h += stride
     return new_image
 
     
