@@ -1,19 +1,8 @@
-import numpy as np
-import pandas as pd
 import csv
-
-import os
-import tqdm
-
 import torch
-from torchvision.utils import save_image
-import h5py
-from matplotlib import pyplot as plt
-
 
 from wct2_style_transfer.model import WaveEncoder, WaveDecoder
 from wct2_style_transfer.utils.core import feature_wct
-from wct2_style_transfer.utils.io import  Timer, open_image, load_segment, compute_label_info
 
 
 class WCT2:
@@ -22,7 +11,7 @@ class WCT2:
                  option_unpool='cat5', device='cuda:0', verbose=True):
 
         self.transfer_at = set(transfer_at)
-        assert not (self.transfer_at - set(['encoder', 'decoder', 'skip'])), 'invalid transfer_at: {}'.format(
+        assert not (self.transfer_at - {'encoder', 'decoder', 'skip'}), 'invalid transfer_at: {}'.format(
             transfer_at)
         assert self.transfer_at, 'empty transfer_at'
 
@@ -132,8 +121,3 @@ class WCT2:
                 if i % 200 == 199:
                     writer.writerows([[i, 0, recon_loss.item(), running_loss / 200]])
                     running_loss = 0.0
-
-
-def style_transfer(wct_loaded_model, content_image_path, style_image_path, image_size=512):
-    with torch.no_grad():
-        img = wct2.transfer(content_image, style_image, content_segment, style_segment, alpha=config['alpha'])

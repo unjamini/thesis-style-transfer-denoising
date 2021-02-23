@@ -69,31 +69,44 @@ def load_samples(path):
     return get_pixels_hu(scans)
 
 
-def extract_patches(ld_image, nd_image, patch_size=40, stride=32, skip_images=40, keep_picked=False):
+def extract_patches_training(ld_image, nd_image, patch_size=40, stride=32, skip_images=40, keep_picked=False):
     images_num, h, w = ld_image.shape
-    images_num //= skip_images
+    images_num //= skip_images if skip_images else 1
     out_ld = np.empty((0, patch_size, patch_size))
     out_nd = np.empty((0, patch_size, patch_size))
     if keep_picked:
         picked = np.empty((0, h, w))
     sz = ld_image.itemsize
-    shape = ((h - patch_size) // stride + 1, (w - patch_size) // stride + 1, patch_size, patch_size)
+    shape = ((h - patch_size) // stride + 2, (w - patch_size) // stride + 2, patch_size, patch_size)
     strides = sz * np.array([w * stride, stride, w, 1])
     images_idxs = random.sample(range(1, ld_image.shape[0]), images_num)
     for d, idx in enumerate(images_idxs):
-        ld_patches = np.lib.stride_tricks.as_strided(ld_image[idx, :, :], shape=shape, strides=strides)
+        ld_patches = np.lib.stride_tricks.as_strided(ld_image[idx, ...], shape=shape, strides=strides)
         ld_blocks = ld_patches.reshape(-1, patch_size, patch_size)
-        out_ld = np.concatenate((out_ld, ld_blocks[:, :, :]))
+        out_ld = np.concatenate((out_ld, ld_blocks))
         if keep_picked:
-            picked = np.concatenate((picked, ld_image[idx, :, :].reshape(1, h, w)))
-        nd_patches = np.lib.stride_tricks.as_strided(nd_image[idx, :, :], shape=shape, strides=strides)
+            picked = np.concatenate((picked, ld_image[idx, ...].reshape(1, h, w)))
+        nd_patches = np.lib.stride_tricks.as_strided(nd_image[idx, ...], shape=shape, strides=strides)
         nd_blocks = nd_patches.reshape(-1, patch_size, patch_size)
-        out_nd = np.concatenate((out_nd, nd_blocks[:, :, :]))
+        out_nd = np.concatenate((out_nd, nd_blocks))
         print(d, end=' ')
     if keep_picked:
-        return out_ld[:, :, :], out_nd[:, :, :], picked
-    return out_ld[:, :, :], out_nd[:, :, :]
+        return out_ld, out_nd, picked
+    return out_ld, out_nd
 
+
+def extract_patches(image, patch_size=40, stride=32):
+    images_num, h, w = image.shape
+    out = np.empty((0, patch_size, patch_size))
+    sz = image.itemsize
+    shape = (h // stride, w // stride, patch_size, patch_size)
+    strides = sz * np.array([w * stride, stride, w, 1])
+    images_idxs = list(range(images_num))
+    for i in range(images_idxs):
+        patches = np.lib.stride_tricks.as_strided(image[i, ...], shape=shape, strides=strides)
+        blocks = patches.reshape(-1, patch_size, patch_size)
+        out = np.concatenate((out, blocks))
+    return out
 
 def write_hdf5(low_dose_images, normal_dose_images, filename="train_data.hdf5"):
     with h5py.File(filename, "w") as f:
@@ -125,7 +138,7 @@ def compile_image(image_slices, image_size=512, slice_size=40, stride=32):
     return new_image
 
     
-if __name__ == '__main__':
+def create_dset_for_trainig():
     patch_size = 40
     ld_data = np.empty((0, patch_size, patch_size))
     nd_data = np.empty((0, patch_size, patch_size))
@@ -138,7 +151,7 @@ if __name__ == '__main__':
             pat_full = load_scan(path_full)
             pixels_low = get_pixels_hu(pat_low)
             pixels_full = get_pixels_hu(pat_full)
-            ld_patches, nd_patches, picked_images = extract_patches(pixels_low, pixels_full, keep_picked=True)
+            ld_patches, nd_patches, picked_images = extract_patches_training(pixels_low, pixels_full, keep_picked=True)
             ld_data = np.concatenate((ld_data, ld_patches))
             nd_data = np.concatenate((nd_data, nd_patches))
             picked_data = np.concatenate((picked_data, picked_images))

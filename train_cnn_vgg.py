@@ -91,7 +91,7 @@ def perceptual_loss(y_true, y_pred):
     loss_model = Model(inputs=vgg.input, outputs=selectedOutputs)
     loss_model.trainable = False
     mse = K.variable(value=0)
-    for i in range(0, 3):
+    for i in range(3):
         mse = mse + K.mean(K.square(loss_model(y_true)[i] - loss_model(y_pred)[i]))
     return mse
 
