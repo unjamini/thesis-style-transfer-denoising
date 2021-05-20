@@ -1,8 +1,8 @@
 import csv
 import torch
 
-from wct2_AdaIN.wctmodel import WaveEncoder, WaveDecoder
-from wct2_AdaIN.wctutils import feature_wct
+from style_transfer.wctmodel import WaveEncoder, WaveDecoder
+from style_transfer.wctutils import feature_wct
 
 
 class WCT2AdaIN:

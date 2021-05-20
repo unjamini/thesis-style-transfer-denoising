@@ -2,8 +2,8 @@ import numpy as np
 import torch
 import h5py
 
-from wct2_AdaIN.model_AdaIN import WCT2AdaIN
-from wct2_AdaIN.wctutils import Timer
+from style_transfer.model_AdaIN import WCT2AdaIN
+from style_transfer.wctutils import Timer
 
 
 def load_images(path, name='LDCT'):

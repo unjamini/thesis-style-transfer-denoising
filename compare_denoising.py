@@ -1,7 +1,7 @@
 import numpy as np
 import h5py
 
-from DRL_E_MP_denoising.train_cnn_vgg import create_model
+from denoiser.train_cnn_vgg import create_model
 from utils.create_datasets import compile_image, extract_patches
 from utils.comparing_utils import get_metrics_lists ,boxplot
 

@@ -6,8 +6,8 @@ import numpy as np
 import torch
 import h5py
 
-from wct2_AdaIN.StylesPicker import StylesPicker
-from wct2_AdaIN.model_AdaIN import WCT2AdaIN
+from style_transfer.StylesPicker import StylesPicker
+from style_transfer.model_AdaIN import WCT2AdaIN
 
 
 # пути до обученных decoder и encoder
